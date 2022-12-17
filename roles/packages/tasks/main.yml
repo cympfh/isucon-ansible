@@ -18,3 +18,5 @@
     - zsh
     - peco
     - fzf
+    - dstat
+    - sysstat
