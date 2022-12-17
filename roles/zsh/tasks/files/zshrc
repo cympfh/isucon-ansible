@@ -1,0 +1,118 @@
+# minimal zshrc
+autoload -Uz add-zsh-hook
+autoload -Uz colors && colors
+autoload -Uz compinit
+autoload -Uz history-search-end
+compinit
+setopt list_packed
+setopt complete_in_word
+unsetopt correct_all
+zstyle ':completion:*' list-colors "${LS_COLORS}"
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*:default' menu select=1
+zstyle ':completion::complete:*' use-cache true
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "^P" history-beginning-search-backward-end
+bindkey "^N" history-beginning-search-forward-end
+
+export EDITOR=vim
+alias l='ls --color=auto'
+alias ll='ls -l --color=auto'
+alias lla='ls -la --color=auto'
+alias x='ls --color=auto'
+alias xl='ls -l --color=auto'
+alias xla='ls -la --color=auto'
+alias e=vim
+alias g='git'
+
+bindkey -d
+bindkey -e
+bindkey '^[[Z' reverse-menu-complete
+
+#
+# cd
+#
+cd-up() {
+    cd ..
+    zle reset-prompt
+}
+zle -N cd-up
+bindkey "^G^U" cd-up
+
+cd-old() {
+    cd -
+    zle reset-prompt
+}
+zle -N cd-old
+bindkey "^G^O" cd-old
+
+#
+# screen
+#
+screen-x () {
+    if [ "$STY" ]; then
+        echo "You are already in screen"
+    else
+        SCREENNAME=$( screen -ls |
+            grep "^        " |
+            sed 's/^\t[0-9]*\.//g; s/\t.*//g' |
+            peco
+        )
+        if [ "${SCREENNAME}" ]
+        then
+            echo -ne "\033]0;${SCREENNAME}\007"
+            screen -x "${SCREENNAME}"
+        fi
+    fi
+}
+insert-screen-x() {
+    BUFFER=screen-x
+    CURSOR=$#BUFFER
+    zle .accept-line
+}
+zle -N insert-screen-x
+bindkey "^K^X" insert-screen-x
+
+screen-s () {
+    if [ "$STY" ]
+    then
+        echo "You are already in screen"
+    else
+        SCREENNAME=${1:-$(basename $(pwd))}
+        echo -ne "\033]0;${SCREENNAME}\007"
+        screen -S "${SCREENNAME}"
+    fi
+}
+insert-screen-s() {
+    BUFFER=screen-s
+    CURSOR=$#BUFFER
+    zle .accept-line
+}
+zle -N insert-screen-s
+bindkey "^K^K" insert-screen-s
+
+setopt prompt_subst
+PROMPT="
+\`prompt-time\` \`prompt-host\`\`prompt-pwd\`
+   "
+COLOR_GRAY=240
+COLOR_RED=red
+COLOR_YELLOW=221
+prompt-colon() {
+    echo -n "%F{$COLOR_GRAY}:%f"
+}
+prompt-time() {
+    echo -n "%(?.%F{$COLOR_GRAY}.%F{$COLOR_RED})%T%f"
+}
+prompt-host() {
+    if [ "$LOCALHOST" -eq 0 ]; then
+        echo -n "%F{$COLOR_YELLOW}${HOST}%f"
+        prompt-colon
+    fi
+}
+prompt-pwd() {
+    echo -n "%F{$COLOR_YELLOW}"
+    echo -n ${PWD/#$HOME/\~} | sed 's#\([^/]\{,3\}\)\([^/]*\)/#\1/#g'
+    echo -n "%f"
+}

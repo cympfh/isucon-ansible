@@ -1,0 +1,3 @@
+[deploy]
+133.242.54.80 ansible_ssh_user=ubuntu
+153.120.139.232 ansible_ssh_user=ubuntu

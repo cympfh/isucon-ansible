@@ -1,0 +1,20 @@
+- name: packages
+  become: true
+  apt:
+    name: "{{ package }}"
+    autoclean: true
+    autoremove: true
+    update_cache: true
+  vars:
+    package:
+    - build-essential
+    - git
+    - vim
+    - emacs
+    - curl
+    - wget
+    - screen
+    - tmux
+    - zsh
+    - peco
+    - fzf

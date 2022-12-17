@@ -1,0 +1,7 @@
+- name: setup zsh
+  copy:
+    src: zshrc
+    dest: ~/.zshrc
+- name: default shell is zsh
+  become: true
+  command: chsh -s '/bin/zsh' ubuntu

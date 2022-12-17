@@ -1,0 +1,4 @@
+- name: setup screen
+  copy:
+    src: screenrc
+    dest: ~/.screenrc
