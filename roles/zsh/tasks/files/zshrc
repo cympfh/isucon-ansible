@@ -4,6 +4,9 @@ autoload -Uz colors && colors
 autoload -Uz compinit
 autoload -Uz history-search-end
 compinit
+setopt share_history
+SAVEHIST=1000  # Save most-recent 1000 lines
+HISTFILE=~/.zsh_history
 setopt list_packed
 setopt complete_in_word
 unsetopt correct_all
@@ -47,6 +50,19 @@ cd-old() {
 zle -N cd-old
 bindkey "^G^O" cd-old
 
+#
+# history
+#
+call-history() {
+    TMP_BUFFER=$(history -n 1 | tac | peco --query "$BUFFER")
+    if [ ! -z "$TMP_BUFFER" ]; then
+        BUFFER=$TMP_BUFFER
+        CURSOR=$#BUFFER
+    fi
+    zle reset-prompt
+}
+zle -N call-history
+bindkey "^R" call-history
 #
 # screen
 #
