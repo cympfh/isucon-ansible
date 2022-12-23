@@ -1,12 +1,14 @@
 - name: setup nginx
   hosts: localhost
   tasks:
-  - become: true
+
+  - name: LTSV Logging for alp
+    become: true
     blockinfile:
       backup: true
       path: /etc/nginx/nginx.conf
-      insertbefore: |-
-        ^[ \t]*access_log.*$
+      insertafter: "^[ \t]*error_log .*$"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK; LTSV LOGGING"
       block: |
         log_format ltsv "time:$time_local"
         "\thost:$remote_addr"
@@ -24,6 +26,45 @@
         "\tapptime:$upstream_response_time"
         "\tvhost:$host";
         access_log /var/log/nginx/access.ltsv ltsv;
+
+  - name: cache dir
+    become: true
+    file:
+      path: /var/cache/nginx/cache
+      state: directory
+
+  - name: temp dir
+    become: true
+    file:
+      path: /var/cache/nginx/temp
+      state: directory
+
+  - name: Settings for Caching
+    become: true
+    blockinfile:
+      backup: false
+      path: /etc/nginx/nginx.conf
+      marker: "# {mark} ANSIBLE MANAGED BLOCK; CACHING"
+      insertafter: "END ANSIBLE MANAGED BLOCK; LTSV LOGGING"
+      block: |
+        # sendfile on;
+        # gzip on;
+        proxy_cache_path /var/cache/nginx/cache levels=1:2 keys_zone=cache:90M;
+        proxy_temp_path /var/cache/nginx/temp;
+        proxy_ignore_headers Cache-Control;
+        server {
+          listen 80;
+          location ~* \.(js|css|ico)$ {
+            expires 1d;
+            proxy_cache cache;
+            proxy_cache_valid 200 301 302 1d;
+            proxy_set_header Host $host;
+            add_header X-Nginx-Cache $upstream_cache_status;
+            # proxy_pass http://app:8080;
+            # root /home/isucon/webapp/public/;  # TODO(正しく)
+          }
+        }
+
   - name: Restart Nginx
     service:
       name: nginx
