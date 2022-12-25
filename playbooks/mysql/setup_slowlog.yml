@@ -1,11 +1,11 @@
 - name: setup MySQL
   hosts: deploy
   tasks:
-  - name: put /etc/mysql/conf.d/isucon.cnf
+  - name: put /etc/mysql/mysql.conf.d/isucon.cnf
     become: true
     copy:
       src: isucon.cnf
-      dest: /etc/mysql/conf.d/isucon.cnf
+      dest: /etc/mysql/mysql.conf.d/isucon.cnf
       force: yes
   - name: Restart MySQL
     become: true

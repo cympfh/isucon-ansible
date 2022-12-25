@@ -1,10 +1,10 @@
 - name: setup MySQL
   hosts: deploy
   tasks:
-  - name: remove /etc/mysql/conf.d/isucon.cnf
+  - name: remove /etc/mysql/mysql.conf.d/isucon.cnf
     become: true
     file:
-      path: /etc/mysql/conf.d/isucon.cnf
+      path: /etc/mysql/mysql.conf.d/isucon.cnf
       state: absent
       force: true
   - name: Restart MySQL
