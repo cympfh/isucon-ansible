@@ -13,3 +13,13 @@
       name: mysql
       state: restarted
       enabled: yes
+  - name: Make log directory accessible from Rust
+    become: true
+    file:
+      path: /var/log/mysql
+      mode: '0755'
+  - name: Make log file writable from Rust
+    become: true
+    file:
+      path: /var/log/mysql/mysql-slow.log
+      mode: '0666'
